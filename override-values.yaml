@@ -1,0 +1,138 @@
+global:
+  domain: "cx498.coralogix.com"
+  clusterName: "ian-bowers-eks-us-east-2"
+
+# Configure eBPF instrumentation
+opentelemetry-ebpf-instrumentation:
+  enabled: true
+  config:
+    create: true
+    data:
+      # Configure OTLP endpoints to send to OpenTelemetry agent on same node
+      otel_traces_export:
+        endpoint: "http://${HOST_IP}:4317"
+      otel_metrics_export:
+        endpoint: "http://${HOST_IP}:4318"
+
+      # Enable Kubernetes attributes for proper filtering
+      attributes:
+        kubernetes:
+          enable: true
+
+      # Configure log level for better debugging
+      log_level: info
+
+      # Filter network traffic to reduce noise
+      filter:
+        network:
+          k8s_dst_owner_name:
+            not_match: '{kube*,*jaeger-agent*,*prometheus*,*promtail*,*grafana-agent*}'
+          k8s_src_owner_name:
+            not_match: '{kube*,*jaeger-agent*,*prometheus*,*promtail*,*grafana-agent*}'
+
+      # Enable prometheus metrics export
+      prometheus_export:
+        port: 9090
+        path: /metrics
+
+      # Optional: Enable internal metrics for monitoring eBPF itself
+      internal_metrics:
+        prometheus:
+          port: 6060
+          path: /metrics
+
+  # Enable service for metrics scraping
+  service:
+    enabled: true
+    type: ClusterIP
+    port: 9090
+    internalMetrics:
+      port: 6060
+
+  # Configure environment variables
+  envValueFrom:
+    HOST_IP:
+      fieldRef:
+        fieldPath: status.hostIP
+
+  # Configure resource limits
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+#opentelemetry-agent:
+#  extraConfig:
+#    processors:
+#      filter/single-namespace:
+#        logs:
+#          log_record:
+#            - 'resource.attributes["k8s.namespace.name"] != "default"'
+#        metrics:
+#          metric:
+#            - 'resource.attributes["k8s.namespace.name"] != "default"'
+#        traces:
+#          span:
+#            - 'resource.attributes["k8s.namespace.name"] != "default"'
+#
+#      # Add transform processor for span metrics enhancement
+#      transform/span_metrics:
+#        trace_statements:
+#          - context: span
+#            statements:
+#              # Remove potential IDs from database queries
+#              - replace_pattern(attributes["db.query.text"], "\\d+", "?")
+#              # Store span duration in nanoseconds
+#              - set(attributes["span.duration_ns"], span.end_time_unix_nano - span.start_time_unix_nano)
+#              # Normalize HTTP status code attributes
+#              - set(attributes["http.response.status_code"], attributes["http.status_code"]) where attributes["http.response.status_code"] == nil
+#              # Normalize database namespace attributes
+#              - set(attributes["db.namespace"], attributes["db.name"]) where attributes["db.namespace"] == nil
+#              - set(attributes["db.namespace"], attributes["server.address"]) where attributes["db.namespace"] == nil and attributes["db.namespace"] == nil
+#              - set(attributes["db.namespace"], attributes["network.peer.name"]) where attributes["db.namespace"] == nil
+#              - set(attributes["db.namespace"], attributes["net.peer.name"]) where attributes["db.namespace"] == nil
+#              - set(attributes["db.namespace"], attributes["db.system"]) where attributes["db.namespace"] == nil
+#              # Normalize database operation name
+#              - set(attributes["db.operation.name"], attributes["db.operation"]) where attributes["db.operation.name"] == nil
+#              # Normalize database collection/table names
+#              - set(attributes["db.collection.name"], attributes["db.sql.table"]) where attributes["db.collection.name"] == nil
+#              - set(attributes["db.collection.name"], attributes["db.cassandra.table"]) where attributes["db.collection.name"] == nil
+#              - set(attributes["db.collection.name"], attributes["db.mongodb.collection"]) where attributes["db.collection.name"] == nil
+#              - set(attributes["db.collection.name"], attributes["db.redis.database_index"]) where attributes["db.collection.name"] == nil
+#              - set(attributes["db.collection.name"], attributes["db.elasticsearch.path_parts.index"]) where attributes["db.collection.name"] == nil
+#              - set(attributes["db.collection.name"], attributes["db.cosmosdb.container"]) where attributes["db.collection.name"] == nil
+#              - set(attributes["db.collection.name"], attributes["aws_dynamodb.table_names"]) where attributes["db.collection.name"] == nil
+#    service:
+#      pipelines:
+#        logs:
+#          processors:
+#            - filter/single-namespace
+#        metrics:
+#          processors:
+#            - filter/single-namespace
+#        traces:
+#          processors:
+#            - filter/single-namespace
+#            - transform/span_metrics
+
+#opentelemetry-cluster-collector:
+#  extraConfig:
+#    processors:
+#      filter/single-namespace:
+#        logs:
+#          log_record:
+#            - 'resource.attributes["k8s.namespace.name"] != "default"'
+#        metrics:
+#          metric:
+#            - 'resource.attributes["k8s.namespace.name"] != "default"'
+#    service:
+#      pipelines:
+#        logs:
+#          processors:
+#            - filter/single-namespace
+#        metrics:
+#          processors:
+#            - filter/single-namespace
