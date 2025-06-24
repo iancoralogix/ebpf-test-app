@@ -27,21 +27,21 @@ kubectl apply -f k8s/payment-service.yaml -n $NAMESPACE
 
 # Wait for deployments to be ready
 echo "Waiting for deployments to be ready..."
-kubectl wait --for=condition=available --timeout=300s deployment/frontend -n $NAMESPACE
-kubectl wait --for=condition=available --timeout=300s deployment/checkout -n $NAMESPACE
-kubectl wait --for=condition=available --timeout=300s deployment/payment -n $NAMESPACE
+kubectl wait --for=condition=available --timeout=300s deployment/frontend-3bp -n $NAMESPACE
+kubectl wait --for=condition=available --timeout=300s deployment/checkout-3bp -n $NAMESPACE
+kubectl wait --for=condition=available --timeout=300s deployment/payment-3bp -n $NAMESPACE
 
 echo "Deployment completed successfully!"
 
 # Show status
 echo "Service status:"
-kubectl get pods -n $NAMESPACE -l 'app in (frontend,checkout,payment)'
-kubectl get services -n $NAMESPACE -l 'app in (frontend,checkout,payment)'
+kubectl get pods -n $NAMESPACE -l 'app in (frontend-3bp,checkout-3bp,payment-3bp)'
+kubectl get services -n $NAMESPACE -l 'app in (frontend-3bp,checkout-3bp,payment-3bp)'
 
 echo ""
 echo "Test the application:"
 echo "1. Port-forward to frontend service:"
-echo "   kubectl port-forward -n $NAMESPACE svc/frontend 8080:8080"
+echo "   kubectl port-forward -n $NAMESPACE svc/frontend-3bp 8080:8080"
 echo ""
 echo "2. Test endpoints:"
 echo "   curl http://localhost:8080/api/health"
@@ -49,4 +49,4 @@ echo "   curl http://localhost:8080/api/info"
 echo "   curl http://localhost:8080/api/simulate/purchase"
 echo ""
 echo "3. Generate load:"
-echo "   for i in {1..100}; do curl -X GET http://localhost:8080/api/simulate/purchase; sleep 1; done" 
+echo "   for i in {1..100}; do curl -X GET http://localhost:8080/api/simulate/purchase; sleep 1; done"
