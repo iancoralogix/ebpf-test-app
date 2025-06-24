@@ -23,7 +23,7 @@ echo "Testing service configurations..."
 
 # Test frontend service configuration
 echo "Testing frontend service..."
-SERVICE_NAME=frontend NEXT_SERVICE_URL=http://checkout:8080 java -Dserver.port=8080 -jar target/ebpf-test-app-1.0.0.jar &
+SERVICE_NAME=frontend-3bp NEXT_SERVICE_URL=http://checkout-3bp:8080 java -Dserver.port=8080 -jar target/ebpf-test-app-1.0.0.jar &
 FRONTEND_PID=$!
 sleep 5
 
@@ -47,7 +47,7 @@ sleep 2
 
 # Test checkout service configuration
 echo "Testing checkout service..."
-SERVICE_NAME=checkout NEXT_SERVICE_URL=http://payment:8080 java -Dserver.port=8081 -jar target/ebpf-test-app-1.0.0.jar &
+SERVICE_NAME=checkout-3bp NEXT_SERVICE_URL=http://payment-3bp:8080 java -Dserver.port=8081 -jar target/ebpf-test-app-1.0.0.jar &
 CHECKOUT_PID=$!
 sleep 5
 
@@ -64,7 +64,7 @@ sleep 2
 
 # Test payment service configuration
 echo "Testing payment service..."
-SERVICE_NAME=payment IS_LEAF_SERVICE=true java -Dserver.port=8082 -jar target/ebpf-test-app-1.0.0.jar &
+SERVICE_NAME=payment-3bp IS_LEAF_SERVICE=true java -Dserver.port=8082 -jar target/ebpf-test-app-1.0.0.jar &
 PAYMENT_PID=$!
 sleep 5
 

@@ -61,7 +61,7 @@ TAG=v1.0.0 ./deploy.sh
 
 ```bash
 # Port-forward to frontend service
-kubectl port-forward svc/frontend 8080:8080
+kubectl port-forward svc/frontend-3bp 8080:8080
 
 # Test health endpoint
 curl http://localhost:8080/api/health
@@ -107,9 +107,9 @@ The application behavior is controlled entirely through environment variables:
 ```yaml
 env:
 - name: SERVICE_NAME
-  value: "frontend"
+  value: "frontend-3bp"
 - name: NEXT_SERVICE_URL
-  value: "http://checkout:8080"
+  value: "http://checkout-3bp:8080"
 - name: IS_LEAF_SERVICE
   value: "false"
 ```
@@ -118,9 +118,9 @@ env:
 ```yaml
 env:
 - name: SERVICE_NAME
-  value: "checkout"
+  value: "checkout-3bp"
 - name: NEXT_SERVICE_URL
-  value: "http://payment:8080"
+  value: "http://payment-3bp:8080"
 - name: IS_LEAF_SERVICE
   value: "false"
 ```
@@ -129,7 +129,7 @@ env:
 ```yaml
 env:
 - name: SERVICE_NAME
-  value: "payment"
+  value: "payment-3bp"
 - name: NEXT_SERVICE_URL
   value: ""
 - name: IS_LEAF_SERVICE

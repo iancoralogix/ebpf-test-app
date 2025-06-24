@@ -1,33 +1,33 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: checkout
+  name: checkout-3bp
   labels:
-    app: checkout
-    service: checkout
+    app: checkout-3bp
+    service: checkout-3bp
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: checkout
+      app: checkout-3bp
   template:
     metadata:
       labels:
-        app: checkout
-        service: checkout
+        app: checkout-3bp
+        service: checkout-3bp
     spec:
       containers:
-      - name: checkout
+      - name: checkout-3bp
         image: public.ecr.aws/w3s4j9x9/ianbowers/ebpf-test-app:latest
         ports:
         - containerPort: 8080
         env:
         - name: SERVICE_NAME
-          value: "checkout"
+          value: "checkout-3bp"
         - name: SERVER_PORT
           value: "8080"
         - name: NEXT_SERVICE_URL
-          value: "http://payment:8080"
+          value: "http://payment-3bp:8080"
         - name: IS_LEAF_SERVICE
           value: "false"
         - name: JAVA_OPTS
@@ -55,12 +55,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: checkout
+  name: checkout-3bp
   labels:
-    app: checkout
+    app: checkout-3bp
 spec:
   selector:
-    app: checkout
+    app: checkout-3bp
   ports:
   - port: 8080
     targetPort: 8080

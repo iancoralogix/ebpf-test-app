@@ -1,29 +1,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: payment
+  name: payment-3bp
   labels:
-    app: payment
-    service: payment
+    app: payment-3bp
+    service: payment-3bp
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: payment
+      app: payment-3bp
   template:
     metadata:
       labels:
-        app: payment
-        service: payment
+        app: payment-3bp
+        service: payment-3bp
     spec:
       containers:
-      - name: payment
+      - name: payment-3bp
         image: public.ecr.aws/w3s4j9x9/ianbowers/ebpf-test-app:latest
         ports:
         - containerPort: 8080
         env:
         - name: SERVICE_NAME
-          value: "payment"
+          value: "payment-3bp"
         - name: SERVER_PORT
           value: "8080"
         - name: NEXT_SERVICE_URL
@@ -55,12 +55,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: payment
+  name: payment-3bp
   labels:
-    app: payment
+    app: payment-3bp
 spec:
   selector:
-    app: payment
+    app: payment-3bp
   ports:
   - port: 8080
     targetPort: 8080

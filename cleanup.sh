@@ -16,7 +16,7 @@ resource_exists() {
 
 # Delete deployments
 echo "Deleting deployments..."
-for deployment in frontend checkout payment; do
+for deployment in frontend-3bp checkout-3bp payment-3bp; do
     if resource_exists deployment "$deployment"; then
         echo "  Deleting deployment: $deployment"
         kubectl delete deployment "$deployment" -n "$NAMESPACE"
@@ -27,7 +27,7 @@ done
 
 # Delete services
 echo "Deleting services..."
-for service in frontend checkout payment; do
+for service in frontend-3bp checkout-3bp payment-3bp; do
     if resource_exists service "$service"; then
         echo "  Deleting service: $service"
         kubectl delete service "$service" -n "$NAMESPACE"
@@ -38,7 +38,7 @@ done
 
 # Wait for pods to be terminated
 echo "Waiting for pods to be terminated..."
-for app in frontend checkout payment; do
+for app in frontend-3bp checkout-3bp payment-3bp; do
     echo "  Waiting for $app pods to terminate..."
     kubectl wait --for=delete pods -l app="$app" -n "$NAMESPACE" --timeout=120s 2>/dev/null || echo "    No $app pods found or timeout reached"
 done
@@ -46,9 +46,9 @@ done
 # Check for any remaining resources
 echo ""
 echo "Checking for any remaining eBPF test app resources..."
-remaining_pods=$(kubectl get pods -n "$NAMESPACE" -l 'app in (frontend,checkout,payment)' --no-headers 2>/dev/null | wc -l)
-remaining_services=$(kubectl get services -n "$NAMESPACE" -l 'app in (frontend,checkout,payment)' --no-headers 2>/dev/null | wc -l)
-remaining_deployments=$(kubectl get deployments -n "$NAMESPACE" -l 'app in (frontend,checkout,payment)' --no-headers 2>/dev/null | wc -l)
+remaining_pods=$(kubectl get pods -n "$NAMESPACE" -l 'app in (frontend-3bp,checkout-3bp,payment-3bp)' --no-headers 2>/dev/null | wc -l)
+remaining_services=$(kubectl get services -n "$NAMESPACE" -l 'app in (frontend-3bp,checkout-3bp,payment-3bp)' --no-headers 2>/dev/null | wc -l)
+remaining_deployments=$(kubectl get deployments -n "$NAMESPACE" -l 'app in (frontend-3bp,checkout-3bp,payment-3bp)' --no-headers 2>/dev/null | wc -l)
 
 if [ "$remaining_pods" -eq 0 ] && [ "$remaining_services" -eq 0 ] && [ "$remaining_deployments" -eq 0 ]; then
     echo "✅ All eBPF test app resources have been successfully removed!"
@@ -59,7 +59,7 @@ else
     echo "   Deployments: $remaining_deployments"
     echo ""
     echo "You can check manually with:"
-    echo "   kubectl get all -n $NAMESPACE -l 'app in (frontend,checkout,payment)'"
+    echo "   kubectl get all -n $NAMESPACE -l 'app in (frontend-3bp,checkout-3bp,payment-3bp)'"
 fi
 
 # Option to delete namespace if it's not default and empty
@@ -87,4 +87,4 @@ echo ""
 echo "Cleanup completed!"
 echo ""
 echo "To verify cleanup, run:"
-echo "  kubectl get all -n $NAMESPACE -l 'app in (frontend,checkout,payment)'" 
+echo "  kubectl get all -n $NAMESPACE -l 'app in (frontend-3bp,checkout-3bp,payment-3bp)'" 
