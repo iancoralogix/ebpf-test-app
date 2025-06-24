@@ -27,27 +27,34 @@ A flexible Spring Boot application designed for testing eBPF instrumentation wit
 ### 1. Build the Application
 
 ```bash
-# Build for Spring Boot 2.6.6 (default)
+# Build only (no push)
 ./build.sh
+
+# Build and push to ECR Public
+PUSH=true ./build.sh
+
+# Build with custom tag
+TAG=v1.0.0 PUSH=true ./build.sh
 
 # Build for Spring Boot 3.0.0
 SPRING_BOOT_VERSION=spring-boot-3 ./build.sh
 
-# Build and push to ECR
-ECR_REPO=your-account.dkr.ecr.us-east-2.amazonaws.com/ebpf-test-app PUSH=true ./build.sh
+# Manual push (if needed)
+aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/w3s4j9x9
+docker push public.ecr.aws/w3s4j9x9/ianbowers/ebpf-test-app:latest
 ```
 
 ### 2. Deploy to Kubernetes
 
 ```bash
-# Update ECR repository in deploy script
-export ECR_REPO=your-account.dkr.ecr.us-east-2.amazonaws.com/ebpf-test-app
-
 # Deploy to default namespace
 ./deploy.sh
 
 # Deploy to specific namespace
 NAMESPACE=ebpf-test ./deploy.sh
+
+# Deploy with custom image tag
+TAG=v1.0.0 ./deploy.sh
 ```
 
 ### 3. Test the Application
@@ -70,6 +77,16 @@ for i in {1..100}; do
   curl -X GET http://localhost:8080/api/simulate/purchase
   sleep 1
 done
+```
+
+### 4. Cleanup
+
+```bash
+# Remove all eBPF test app resources
+./cleanup.sh
+
+# Cleanup from specific namespace
+NAMESPACE=ebpf-test ./cleanup.sh
 ```
 
 ## Configuration
