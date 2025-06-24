@@ -1,0 +1,119 @@
+global:
+  domain: "cx498.coralogix.com"
+  clusterName: "ian-bowers-eks-us-east-2"
+
+opentelemetry-agent:
+  config:
+    connectors:
+      forward/db: {}
+      spanmetrics:
+        dimensions:
+          - name: http.method
+          - name: cgx.transaction
+          - name: cgx.transaction.root
+          - name: status_code
+          - name: db.namespace
+          - name: db.operation.name
+          - name: db.collection.name
+          - name: db.system
+          - name: http.response.status_code
+          - name: rpc.grpc.status_code
+          - name: service.version
+        histogram:
+          explicit:
+            buckets:
+              - 1ms
+              - 4ms
+              - 10ms
+              - 20ms
+              - 50ms
+              - 100ms
+              - 200ms
+              - 500ms
+              - 1s
+              - 2s
+              - 5s
+        metrics_expiration: 5m
+        metrics_flush_interval: '30s'
+        namespace: ""
+      spanmetrics/db:
+        dimensions:
+          - name: db.namespace
+          - name: db.operation.name
+          - name: db.collection.name
+          - name: db.system
+          - name: service.version
+        histogram:
+          explicit:
+            buckets:
+              - 100us
+              - 1ms
+              - 2ms
+              - 2.5ms
+              - 4ms
+              - 6ms
+              - 10ms
+              - 100ms
+              - 250ms
+        metrics_expiration: 5m
+        metrics_flush_interval: '30s'
+        namespace: db
+    processors:
+      filter/single-namespace:
+        logs:
+          log_record:
+            - 'resource.attributes["k8s.namespace.name"] != "default"'
+        metrics:
+          metric:
+            - 'resource.attributes["k8s.namespace.name"] != "default"'
+        traces:
+          span:
+            - 'resource.attributes["k8s.namespace.name"] != "default"'
+      filter/db_spanmetrics:
+        traces:
+          span:
+            - attributes["db.system"] == nil
+    service:
+      pipelines:
+        logs:
+          processors:
+            - filter/single-namespace
+        metrics:
+          receivers:
+            - spanmetrics
+            - spanmetrics/db
+          processors:
+            - filter/single-namespace
+        traces:
+          processors:
+            - filter/single-namespace
+          exporters:
+            - spanmetrics
+            - forward/db
+        traces/db:
+          receivers:
+            - forward/db
+          processors:
+            - filter/db_spanmetrics
+            - batch
+          exporters:
+            - spanmetrics/db
+
+opentelemetry-cluster-collector:
+  config:
+    processors:
+      filter/single-namespace:
+        logs:
+          log_record:
+            - 'resource.attributes["k8s.namespace.name"] != "default"'
+        metrics:
+          metric:
+            - 'resource.attributes["k8s.namespace.name"] != "default"'
+    service:
+      pipelines:
+        logs:
+          processors:
+            - filter/single-namespace
+        metrics:
+          processors:
+            - filter/single-namespace
