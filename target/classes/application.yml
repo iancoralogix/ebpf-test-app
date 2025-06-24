@@ -1,0 +1,30 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: ${SERVICE_NAME:ebpf-test-app}
+  
+app:
+  service:
+    name: ${SERVICE_NAME:frontend}
+    next-service-url: ${NEXT_SERVICE_URL:}
+    port: ${SERVER_PORT:8080}
+    is-leaf: ${IS_LEAF_SERVICE:false}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.coralogix.ebpftest: INFO
+    org.springframework.web: INFO
+    org.apache.http: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{requestId}] %logger{36} - %msg%n" 

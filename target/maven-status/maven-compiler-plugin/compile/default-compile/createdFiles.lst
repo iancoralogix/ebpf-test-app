@@ -1,0 +1,6 @@
+com/coralogix/ebpftest/config/ServiceConfig.class
+com/coralogix/ebpftest/controller/ServiceController.class
+com/coralogix/ebpftest/model/ServiceRequest.class
+com/coralogix/ebpftest/service/HttpClientService.class
+com/coralogix/ebpftest/EbpfTestApplication.class
+com/coralogix/ebpftest/model/ServiceResponse.class
